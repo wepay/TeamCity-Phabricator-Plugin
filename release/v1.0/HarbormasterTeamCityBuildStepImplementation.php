@@ -67,12 +67,21 @@ final class HarbormasterTeamCityBuildStepImplementation
 
     $credential_phid = $this->getSetting('credential');
     if ($credential_phid) {
+<<<<<<< Updated upstream
       $key = PassphrasePasswordKey::loadFromPHID(
         $credential_phid,
         $viewer);
       $future->setHTTPBasicAuthCredentials(
         $key->getUsernameEnvelope()->openEnvelope(),
         $key->getPasswordEnvelope());
+=======
+       $key = PassphrasePasswordKey::loadFromPHID(
+              $credential_phid,
+              $viewer);
+       $username = $key->getUsernameEnvelope()->openEnvelope();
+       $password = $key->getPasswordEnvelope()->openEnvelope();
+       curl_setopt($process, CURLOPT_USERPWD, $username . ":" . $password);
+>>>>>>> Stashed changes
     }
 
     $this->resolveFutures(
@@ -95,15 +104,15 @@ final class HarbormasterTeamCityBuildStepImplementation
     }
     $header_lines = implode("\n", $header_lines);
 
-    $build_target
-      ->newLog($uri, 'http.head')
-      ->append($header_lines);
+    //$build_target
+    //  ->newLog($uri, 'http.head')
+    //  ->append($headers);
 
-    $build_target
-      ->newLog($uri, 'http.body')
-      ->append($body);
+    //$build_target
+    //  ->newLog($uri, 'http.body')
+    //  ->append($body);
 
-    if ($status->isError()) {
+    if ($status === 200) {
       throw new HarbormasterBuildFailureException();
     }
   }
