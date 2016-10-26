@@ -46,11 +46,12 @@ public class BuildTracker implements Runnable {
         }
 
         while (!build.isFinished()){
-            if(!appConfig.isEnabled())
+            if(!appConfig.isEnabled()) {
                     return;
-            try {
-            Thread.sleep(10000);
+            } try {
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         } 
         build.getBuildStatistics(BuildStatisticsOptions.ALL_TESTS_NO_DETAILS)

@@ -72,9 +72,9 @@ public class Agent extends AgentLifeCycleAdapter {
             this.logger.info("Plugin is enabled, starting patch process");
             this.appConfig.setWorkingDir(runner.getWorkingDirectory().getPath());
             this.logger.info("working dir = " + this.appConfig.getWorkingDir());
+            this.conduitClient = new ConduitClient(this.appConfig.getPhabricatorUrl(), this.appConfig.getPhabricatorProtocol(), this.appConfig.getConduitToken(), logger);
             this.conduitClient.submitHarbormasterMessage(this.appConfig.getHarbormasterTargetPHID(), "work");
             new ApplyPatch(runner, this.appConfig).run();
-            this.conduitClient = new ConduitClient(this.appConfig.getPhabricatorUrl(), this.appConfig.getPhabricatorProtocol(), this.appConfig.getConduitToken(), logger);
             this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build started: " + TEAMCITY_SERVER_URL + "/viewLog.html?buildId=" + runner.getBuild().getBuildId());
         }
         //If plugin enabled, run it
