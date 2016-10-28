@@ -27,7 +27,7 @@ public class Agent extends AgentLifeCycleAdapter {
             @NotNull final EventDispatcher<AgentLifeCycleListener> eventDispatcher,
             @NotNull final PhabLogger phabLogger,
             @NotNull final AppConfig appConfig
-    ){
+    ) {
         eventDispatcher.addListener(this);
         this.logger = phabLogger;
         this.appConfig = appConfig;
@@ -49,7 +49,7 @@ public class Agent extends AgentLifeCycleAdapter {
         this.buildFeatures = build.getBuildFeaturesOfType("phabricator");
         this.appConfig.setParams(null);
         this.appConfig.setEnabled(false);
-        if(!this.buildFeatures.isEmpty()) {
+        if (!this.buildFeatures.isEmpty()) {
             try {
                 Map<String, String> configs = new HashMap<>();
                 configs.putAll(build.getSharedBuildParameters().getEnvironmentVariables());
@@ -63,6 +63,7 @@ public class Agent extends AgentLifeCycleAdapter {
               } catch (Exception e) { this.logger.warn("Build Started Error: ", e); }
          }
     }
+
     @Override
     public void beforeRunnerStart(@NotNull BuildRunnerContext runner) {
         super.beforeRunnerStart(runner);
@@ -72,8 +73,8 @@ public class Agent extends AgentLifeCycleAdapter {
             this.logger.info("Plugin is enabled, starting patch process");
             this.appConfig.setWorkingDir(runner.getWorkingDirectory().getPath());
             this.logger.info("working dir = " + this.appConfig.getWorkingDir());
-            this.conduitClient = new ConduitClient(this.appConfig.getPhabricatorUrl(), this.appConfig.getPhabricatorProtocol(), this.appConfig.getConduitToken(), logger);
-            this.conduitClient.submitHarbormasterMessage(this.appConfig.getHarbormasterTargetPHID(), "work");
+            this.conduitClient = new ConduitClient(this.appConfig.getPhabricatorUrl(), this.appConfig.getPhabricatorProtocol(), this.appConfig.getConduitToken(), this.logger);
+            //this.conduitClient.submitHarbormasterMessage(this.appConfig.getHarbormasterTargetPHID(), "work");
             new ApplyPatch(runner, this.appConfig).run();
             this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build started: " + TEAMCITY_SERVER_URL + "/viewLog.html?buildId=" + runner.getBuild().getBuildId());
         }
@@ -89,9 +90,9 @@ public class Agent extends AgentLifeCycleAdapter {
     public void buildFinished(@NotNull AgentRunningBuild build, @NotNull BuildFinishedStatus status) {
         super.buildFinished(build, status);
         this.refreshConfig(build);
-        if(this.appConfig.isEnabled()) {
+        if (this.appConfig.isEnabled()) {
             String buildInfo = TEAMCITY_SERVER_URL + "/viewLog.html?buildId=" + build.getBuildId();
-            if(status.isFailed() && status.isFinished()) {
+            if (status.isFailed() && status.isFinished()) {
                 buildInfo += this.appConfig.getErrorMsg();
                 this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build failed: " + buildInfo);
                 this.conduitClient.submitHarbormasterMessage(this.appConfig.getHarbormasterTargetPHID(), "fail");
