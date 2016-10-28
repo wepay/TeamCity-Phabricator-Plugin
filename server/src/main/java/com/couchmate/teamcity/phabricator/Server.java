@@ -5,9 +5,9 @@ import com.couchmate.teamcity.phabricator.conduit.*;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.messages.BuildMessage1;
 import jetbrains.buildServer.serverSide.*;
-import jetbrains.buildServer.vcs.*;
 import jetbrains.buildServer.tests.TestInfo;
 import jetbrains.buildServer.util.EventDispatcher;
+import jetbrains.buildServer.vcs.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -34,10 +34,10 @@ public class Server extends BuildServerAdapter {
     @Override
     public void buildTypeAddedToQueue(@NotNull SQueuedBuild queuedBuild) {
         super.buildTypeAddedToQueue(queuedBuild);
-        Map<String, String> params = new HashMap<>();
-        params.putAll(queuedBuild.getBuildPromotion().getParameters());
         Collection<SBuildFeatureDescriptor> phabBuildFeature = queuedBuild.getBuildType().getBuildFeaturesOfType("phabricator");
         if (!phabBuildFeature.isEmpty()) {
+            Map<String, String> params = new HashMap<>();
+            params.putAll(queuedBuild.getBuildPromotion().getParameters());
             params.putAll(phabBuildFeature.iterator().next().getParameters());
             String phabricatorProtocol = null;
             String phabricatorUrl = null;
