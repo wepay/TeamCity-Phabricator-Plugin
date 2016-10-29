@@ -19,13 +19,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BuildTracker implements Runnable {
+public class BuildTracker {
 
     private SRunningBuild build;
     private AppConfig appConfig;
     private Map<String, STest> tests;
 
-    public BuildTracker(SRunningBuild build){
+    public BuildTracker(SRunningBuild build) {
         this.build = build;
         this.appConfig = new AppConfig();
         this.tests = new HashMap<>();
@@ -33,40 +33,35 @@ public class BuildTracker implements Runnable {
     }
 
     public void run() {
-        if(!appConfig.isEnabled()){
-            try{
+        if (!appConfig.isEnabled()) {
+            try {
                 Map<String, String> params = new HashMap<>();
                 params.putAll(this.build.getBuildOwnParameters());
                 params.putAll(this.build.getBuildFeaturesOfType("phabricator").iterator().next().getParameters());
-                for(String param : params.keySet())
-                    if(param != null) Loggers.AGENT.info(String.format("Found %s", param));
+                for (String param : params.keySet()) {
+                    if (param != null) {
+                        Loggers.AGENT.info(String.format("Found %s", param));
+                    }
+                }
                 this.appConfig.setParams(params);
                 this.appConfig.parse();
             } catch (Exception e) { Loggers.SERVER.error("BuildTracker Param Parse", e); }
         }
-
-        while (!build.isFinished()){
-            if(!appConfig.isEnabled()) {
-                    return;
-            } try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        } 
-        build.getBuildStatistics(BuildStatisticsOptions.ALL_TESTS_NO_DETAILS)
-                .getAllTests()
-                .forEach(
-                        testRun -> {
-                            if(!this.tests.containsKey(testRun.getTest().getName().getAsString())) {
-                                this.tests.put(testRun.getTest().getName().getAsString(),
-                                        testRun.getTest());
-                                sendTestReport(testRun.getTest().getName().getAsString(),
-                                        testRun);
+        if (appConfig.isEnabled()) {
+            build.getBuildStatistics(BuildStatisticsOptions.ALL_TESTS_NO_DETAILS)
+                    .getAllTests()
+                    .forEach(
+                            testRun -> {
+                                if(!this.tests.containsKey(testRun.getTest().getName().getAsString())) {
+                                    this.tests.put(testRun.getTest().getName().getAsString(),
+                                            testRun.getTest());
+                                    sendTestReport(testRun.getTest().getName().getAsString(),
+                                            testRun);
+                                }
                             }
-                        }
-                );
-         Loggers.SERVER.info(this.build.getBuildNumber() + " finished");
+                    );
+             Loggers.SERVER.info(this.build.getBuildNumber() + " finished");
+        }
     }
 
     private CloseableHttpClient createHttpClient() {
@@ -86,12 +81,12 @@ public class BuildTracker implements Runnable {
                 .addFormParam(new StringKeyValue("unit[0][name]", test.getTest().getName().getTestMethodName()))
                 .addFormParam(new StringKeyValue("unit[0][namespace]", test.getTest().getName().getClassName()));
 
-        if(test.getStatus().isSuccessful()){
+        if (test.getStatus().isSuccessful()) {
             httpPost.addFormParam(new StringKeyValue("unit[0][result]", "pass"));
-        } else if (test.getStatus().isFailed()){
+        } else if (test.getStatus().isFailed()) {
             httpPost.addFormParam(new StringKeyValue("unit[0][result]", "fail"));
         }
-        try(CloseableHttpResponse response = createHttpClient().execute(httpPost.build())){
+        try (CloseableHttpResponse response = createHttpClient().execute(httpPost.build())) {
             Loggers.SERVER.warn(String.format("Test Response: %s\nTest Body: %s\n",
                     response.getStatusLine().getStatusCode(),
                     IOUtils.toString(response.getEntity().getContent())));

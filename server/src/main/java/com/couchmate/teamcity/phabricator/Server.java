@@ -20,7 +20,7 @@ import java.util.Map;
 public class Server extends BuildServerAdapter {
 
     private Map<String, List<STestRun>> tests = new HashMap<>();
-    private Collection<SBuildFeatureDescriptor> buildFeatures = null;
+    //private Collection<SBuildFeatureDescriptor> buildFeatures = null;
     private PhabLogger logger;
 
     public Server(
@@ -47,7 +47,8 @@ public class Server extends BuildServerAdapter {
             conduitClient.submitDifferentialComment(appConfig.getRevisionId(), "Build added to queue");
         }
     }
-
+    
+    /*
     @Override
     public void buildStarted(@NotNull SRunningBuild runningBuild) {
         super.buildStarted(runningBuild);
@@ -59,6 +60,17 @@ public class Server extends BuildServerAdapter {
             catch(Exception e) {
                 Loggers.SERVER.error("Exception thrown by BuildTracker e = " + e.getMessage());
             }
+        }
+    }
+    */
+
+    @Override
+    public void buildFinished(@NotNull SRunningBuild runningBuild) {
+        super.buildFinished(runningBuild);
+        Collection<SBuildFeatureDescriptor> buildFeatures = runningBuild.getBuildFeaturesOfType("phabricator");
+        if (!buildFeatures.isEmpty()) {
+            BuildTracker buildTracker = new BuildTracker(runningBuild);
+            buildTracker.run();
         }
     }
 }
