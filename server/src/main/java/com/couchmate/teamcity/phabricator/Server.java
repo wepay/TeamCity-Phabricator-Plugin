@@ -39,19 +39,12 @@ public class Server extends BuildServerAdapter {
             Map<String, String> params = new HashMap<>();
             params.putAll(queuedBuild.getBuildPromotion().getParameters());
             params.putAll(phabBuildFeature.iterator().next().getParameters());
-            String phabricatorProtocol = null;
-            String phabricatorUrl = null;
-            try {
-                URL aURL = new URL(params.get("tcphab.phabricatorUrl"));
-                phabricatorProtocol = aURL.getProtocol();
-                phabricatorUrl = aURL.getHost();
-                params.put("tcphab.phabricatorUrl", phabricatorUrl);
-            } catch (IOException e) {
-               Loggers.SERVER.error(String.format("phabricator url could not be parsed: %s", e.getStackTrace()[0].toString()));
-            }
-            ConduitClient conduitClient = new ConduitClient(params.get("tcphab.phabricatorUrl"), phabricatorProtocol, params.get("tcphab.conduitToken"), this.logger);
-            conduitClient.submitHarbormasterMessage(params.get("env.harbormasterTargetPHID"), "work");
-            conduitClient.submitDifferentialComment(params.get("env.revisionId"), "Build added to queue");
+            AppConfig appConfig = new AppConfig();
+            appConfig.setParams(params);
+            appConfig.parse();
+            ConduitClient conduitClient = new ConduitClient(appConfig.getPhabricatorUrl(), appConfig.getPhabricatorProtocol(), appConfig.getConduitToken(), this.logger);
+            conduitClient.submitHarbormasterMessage(appConfig.getHarbormasterTargetPHID(), "work");
+            conduitClient.submitDifferentialComment(appConfig.getRevisionId(), "Build added to queue");
         }
     }
 
@@ -67,5 +60,5 @@ public class Server extends BuildServerAdapter {
                 Loggers.SERVER.error("Exception thrown by BuildTracker e = " + e.getMessage());
             }
         }
-    }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+    }
 }

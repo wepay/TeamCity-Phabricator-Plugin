@@ -74,6 +74,10 @@ public final class AppConfig {
                         logger.info(String.format("Found env diffId: %s", params.get(ENV_DIFF_ID)));
                         this.diffId = params.get(ENV_DIFF_ID);
                         break;
+                    case ENV_REVISION_ID:
+                        logger.info(String.format("Found env revisionId: %s", params.get(ENV_REVISION_ID)));
+                        this.revisionId = params.get(ENV_REVISION_ID);
+                        break;
                     case REVISION_ID:
                         logger.info(String.format("Found revisionId: %s", params.get(REVISION_ID)));
                         this.revisionId = params.get(REVISION_ID);
