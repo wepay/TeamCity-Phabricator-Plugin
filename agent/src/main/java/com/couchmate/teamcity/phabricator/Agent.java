@@ -22,6 +22,7 @@ public class Agent extends AgentLifeCycleAdapter {
     private boolean first = true;
     private Map<String, Integer> unique;
     private AgentRunningBuild runningBuild = null;
+    private String serverUrl = "http://teamcity.devops.wepay-inc.com";
 
     public Agent(
             @NotNull final EventDispatcher<AgentLifeCycleListener> eventDispatcher,
@@ -76,7 +77,8 @@ public class Agent extends AgentLifeCycleAdapter {
             this.conduitClient = new ConduitClient(this.appConfig.getPhabricatorUrl(), this.appConfig.getPhabricatorProtocol(), this.appConfig.getConduitToken(), this.logger);
             //this.conduitClient.submitHarbormasterMessage(this.appConfig.getHarbormasterTargetPHID(), "work");
             new ApplyPatch(runner, this.appConfig).run();
-            this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build started: " + TEAMCITY_SERVER_URL + "/viewLog.html?buildId=" + runner.getBuild().getBuildId());
+            //this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build started: " + TEAMCITY_SERVER_URL + "/viewLog.html?buildId=" + runner.getBuild().getBuildId());
+            this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build started: " + this.serverUrl + "/viewLog.html?buildId=" + runner.getBuild().getBuildId());
         }
         //If plugin enabled, run it
     }
@@ -91,7 +93,8 @@ public class Agent extends AgentLifeCycleAdapter {
         super.buildFinished(build, status);
         this.refreshConfig(build);
         if (this.appConfig.isEnabled()) {
-            String buildInfo = TEAMCITY_SERVER_URL + "/viewLog.html?buildId=" + build.getBuildId();
+            //String buildInfo = TEAMCITY_SERVER_URL + "/viewLog.html?buildId=" + build.getBuildId();
+            String buildInfo = this.serverUrl + "/viewLog.html?buildId=" + build.getBuildId();
             if (status.isFailed() && status.isFinished()) {
                 buildInfo += this.appConfig.getErrorMsg();
                 this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build failed: " + buildInfo);
