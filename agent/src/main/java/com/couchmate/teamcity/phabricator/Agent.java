@@ -90,7 +90,6 @@ public class Agent extends AgentLifeCycleAdapter {
         if (this.appConfig.isEnabled()) {
             String buildInfo = this.appConfig.getServerUrl() + "/viewLog.html?buildId=" + build.getBuildId();
             if (status.isFailed() && status.isFinished()) {
-                buildInfo += this.appConfig.getErrorMsg();
                 this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build failed: " + buildInfo);
                 this.conduitClient.submitHarbormasterMessage(this.appConfig.getHarbormasterTargetPHID(), "fail");
             } else if (!status.isFailed() && status.isFinished()) {
