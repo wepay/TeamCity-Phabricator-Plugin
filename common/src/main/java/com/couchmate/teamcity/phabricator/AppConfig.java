@@ -21,6 +21,7 @@ public final class AppConfig {
     private String diffId;
     private String revisionId;
     private String harbormasterTargetPHID;
+    private String serverUrl;
     private String workingDir;
     private String errormsg;
     private Boolean enabled = false;
@@ -42,6 +43,7 @@ public final class AppConfig {
     //TODO used for commenting on diffs eventually
     private final String REVISION_ID = "revisionId";
     private final String ENV_REVISION_ID = "env.revisionId";
+    private final String SERVER_URL = "serverUrl";
 
     public void parse(){
         enabled = false;
@@ -58,6 +60,10 @@ public final class AppConfig {
                         } catch (IOException e) {
                            logger.info(String.format("phabricator url could not be parsed: %s", e.getStackTrace()[0].toString()));
                         }
+                        break;
+                    case SERVER_URL:
+                        logger.info(String.format("Found server url: %s", params.get(SERVER_URL)));
+                        this.serverUrl = params.get(SERVER_URL);
                         break;
                     case CONDUIT_TOKEN:
                         logger.info(String.format("Found conduitToken: %s", params.get(CONDUIT_TOKEN)));
@@ -129,6 +135,10 @@ public final class AppConfig {
         } else {
             this.workingDir = workingDir;
         }
+    }
+
+    public String getServerUrl() {
+        return this.serverUrl;
     }
 
     public String getHarbormasterTargetPHID() {

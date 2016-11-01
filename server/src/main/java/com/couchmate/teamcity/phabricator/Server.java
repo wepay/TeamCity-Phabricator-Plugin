@@ -20,8 +20,8 @@ import java.util.Map;
 public class Server extends BuildServerAdapter {
 
     private Map<String, List<STestRun>> tests = new HashMap<>();
-    //private Collection<SBuildFeatureDescriptor> buildFeatures = null;
     private PhabLogger logger;
+    private String serverUrl;
 
     public Server(
             @NotNull final EventDispatcher<BuildServerListener> buildServerListener,
@@ -29,6 +29,7 @@ public class Server extends BuildServerAdapter {
     ) {
         buildServerListener.addListener(this);
         this.logger = logger;
+        this.serverUrl = TCServerUrl.getServerUrl();
     }
 
     @Override
@@ -44,25 +45,11 @@ public class Server extends BuildServerAdapter {
             appConfig.parse();
             ConduitClient conduitClient = new ConduitClient(appConfig.getPhabricatorUrl(), appConfig.getPhabricatorProtocol(), appConfig.getConduitToken(), this.logger);
             conduitClient.submitHarbormasterMessage(appConfig.getHarbormasterTargetPHID(), "work");
-            conduitClient.submitDifferentialComment(appConfig.getRevisionId(), "Build added to queue");
+            conduitClient.submitDifferentialComment(appConfig.getRevisionId(), "Build added to queue: " + this.serverUrl + "/viewLog.html?buildId=" + queuedBuild.getItemId());
+            SimpleParameter tcServerUrl = new SimpleParameter("serverUrl", this.serverUrl);
+            queuedBuild.getBuildType().addParameter(tcServerUrl);
         }
     }
-    
-    /*
-    @Override
-    public void buildStarted(@NotNull SRunningBuild runningBuild) {
-        super.buildStarted(runningBuild);
-        this.buildFeatures = runningBuild.getBuildFeaturesOfType("phabricator");
-        if (!this.buildFeatures.isEmpty()) {
-            try {
-                new Thread(new BuildTracker(runningBuild)).start();
-            }
-            catch(Exception e) {
-                Loggers.SERVER.error("Exception thrown by BuildTracker e = " + e.getMessage());
-            }
-        }
-    }
-    */
 
     @Override
     public void buildFinished(@NotNull SRunningBuild runningBuild) {
