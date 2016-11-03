@@ -36,7 +36,6 @@ public class Agent extends AgentLifeCycleAdapter {
     @Override
     public void buildStarted(@NotNull AgentRunningBuild runningBuild) {
         super.buildStarted(runningBuild);
-        //Get logger
         this.logger.setBuildLogger(runningBuild.getBuildLogger());
         this.runningBuild = runningBuild;
         this.unique = new HashMap<String, Integer>();
@@ -71,11 +70,9 @@ public class Agent extends AgentLifeCycleAdapter {
             this.appConfig.setWorkingDir(runner.getWorkingDirectory().getPath());
             this.logger.info("working dir = " + this.appConfig.getWorkingDir());
             this.conduitClient = new ConduitClient(this.appConfig.getPhabricatorUrl(), this.appConfig.getPhabricatorProtocol(), this.appConfig.getConduitToken(), this.logger);
-            //this.conduitClient.submitHarbormasterMessage(this.appConfig.getHarbormasterTargetPHID(), "work");
             new ApplyPatch(runner, this.appConfig).run();
             this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build started: " + this.appConfig.getServerUrl() + "/viewLog.html?buildId=" + runner.getBuild().getBuildId());
         }
-        //If plugin enabled, run it
     }
 
     @Override
