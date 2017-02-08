@@ -78,7 +78,8 @@ public final class AppConfig {
                         this.arcPath = params.get(ARC_PATH);
                     case ENV_DIFF_ID:
                         logger.info(String.format("Found env diffId: %s", params.get(ENV_DIFF_ID)));
-                        this.diffId = params.get(ENV_DIFF_ID);
+                        this.diffId = isNullOrEmpty(this.diffId) ? params.get(ENV_DIFF_ID) : this.diffId;
+                        logger.info(String.format("Set env diffId: %s", this.diffId));
                         break;
                     case ENV_REVISION_ID:
                         logger.info(String.format("Found env revisionId: %s", params.get(ENV_REVISION_ID)));
@@ -90,7 +91,8 @@ public final class AppConfig {
                         break;
                     case DIFF_ID:
                         logger.info(String.format("Found diffId: %s", params.get(DIFF_ID)));
-                        this.diffId = params.get(DIFF_ID);
+                        this.diffId = isNullOrEmpty(this.diffId) ? params.get(DIFF_ID) : this.diffId;
+                        logger.info(String.format("Set env diffId: %s", this.diffId));
                         break;
                     case ERROR_MSG:
                         logger.info(String.format("Found Error Msg: %s", params.get(ERROR_MSG)));
