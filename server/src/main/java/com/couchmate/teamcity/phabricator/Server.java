@@ -48,9 +48,11 @@ public class Server extends BuildServerAdapter {
             appConfig.parse();
             queuedBuild.getBuildPromotion().setBuildComment(queuedBuild.getTriggeredBy().getUser(),
                 appConfig.getPhabricatorProtocol() + "://" + appConfig.getPhabricatorUrl() + "/D" + appConfig.getRevisionId());
-            ConduitClient conduitClient = new ConduitClient(appConfig.getPhabricatorUrl(), appConfig.getPhabricatorProtocol(), appConfig.getConduitToken(), this.logger);
-            conduitClient.submitHarbormasterMessage(appConfig.getHarbormasterTargetPHID(), "work");
-            conduitClient.submitDifferentialComment(appConfig.getRevisionId(), "Build added to queue: " + this.serverUrl + "/viewLog.html?buildId=" + queuedBuild.getItemId());
+            if (appConfig.reportBegin()) {
+                ConduitClient conduitClient = new ConduitClient(appConfig.getPhabricatorUrl(), appConfig.getPhabricatorProtocol(), appConfig.getConduitToken(), this.logger);
+                conduitClient.submitHarbormasterMessage(appConfig.getHarbormasterTargetPHID(), "work");
+                conduitClient.submitDifferentialComment(appConfig.getRevisionId(), "Build added to queue: " + this.serverUrl + "/viewLog.html?buildId=" + queuedBuild.getItemId());
+            }
         }
     }
 
@@ -59,7 +61,7 @@ public class Server extends BuildServerAdapter {
         super.buildFinished(runningBuild);
         Collection<SBuildFeatureDescriptor> buildFeatures = runningBuild.getBuildFeaturesOfType("phabricator");
         if (!buildFeatures.isEmpty()) {
-            BuildTracker buildTracker = new BuildTracker(runningBuild);
+            BuildTracker buildTracker = new BuildTracker(runningBuild, this.logger);
             buildTracker.run();
         }
     }

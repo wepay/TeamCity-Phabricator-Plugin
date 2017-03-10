@@ -21,7 +21,6 @@ public class Agent extends AgentLifeCycleAdapter {
     private boolean first = true;
     private Map<String, Integer> unique;
     private AgentRunningBuild runningBuild = null;
-
     public Agent(
             @NotNull final EventDispatcher<AgentLifeCycleListener> eventDispatcher,
             @NotNull final PhabLogger phabLogger,
@@ -70,8 +69,10 @@ public class Agent extends AgentLifeCycleAdapter {
             this.appConfig.setWorkingDir(runner.getWorkingDirectory().getPath());
             this.logger.info("working dir = " + this.appConfig.getWorkingDir());
             this.conduitClient = new ConduitClient(this.appConfig.getPhabricatorUrl(), this.appConfig.getPhabricatorProtocol(), this.appConfig.getConduitToken(), this.logger);
-            new ApplyPatch(runner, this.appConfig).run();
-            this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build started: " + this.appConfig.getServerUrl() + "/viewLog.html?buildId=" + runner.getBuild().getBuildId());
+            if(this.appConfig.shouldPatch()) {
+                new ApplyPatch(runner, this.appConfig).run();
+                this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build started: " + this.appConfig.getServerUrl() + "/viewLog.html?buildId=" + runner.getBuild().getBuildId());
+            }
         }
     }
 
@@ -84,18 +85,5 @@ public class Agent extends AgentLifeCycleAdapter {
     public void buildFinished(@NotNull AgentRunningBuild build, @NotNull BuildFinishedStatus status) {
         super.buildFinished(build, status);
         this.refreshConfig(build);
-        if (this.appConfig.isEnabled()) {
-            String buildInfo = this.appConfig.getServerUrl() + "/viewLog.html?buildId=" + build.getBuildId();
-            if (status.isFailed() && status.isFinished()) {
-                this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build failed: " + buildInfo);
-                this.conduitClient.submitHarbormasterMessage(this.appConfig.getHarbormasterTargetPHID(), "fail");
-            } else if (!status.isFailed() && status.isFinished()) {
-                this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build successful: " + buildInfo);
-                this.conduitClient.submitHarbormasterMessage(this.appConfig.getHarbormasterTargetPHID(), "pass");
-            } else {
-                this.conduitClient.submitDifferentialComment(this.appConfig.getRevisionId(), "Build error: " + buildInfo);
-                this.conduitClient.submitHarbormasterMessage(this.appConfig.getHarbormasterTargetPHID(), "fail");
-            }
-        }
     }
 }

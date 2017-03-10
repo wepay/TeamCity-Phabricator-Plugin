@@ -24,6 +24,9 @@ public final class AppConfig {
     private String serverUrl;
     private String workingDir;
     private String errormsg;
+    private Boolean shouldPatch = false;
+    private Boolean reportBegin = false;
+    private Boolean reportEnd = false;
     private Boolean enabled = false;
 
     public AppConfig(){
@@ -36,6 +39,9 @@ public final class AppConfig {
     private final String CODE_LOCATION = "tcphab.pathToCode";
     private final String ARC_PATH = "tcphab.pathToArc";
     private final String ERROR_MSG = "tcphab.errorInfo";
+    private final String REPORT_BEGIN = "tcphab.reportBegin";
+    private final String REPORT_END = "tcphab.reportEnd";
+    private final String PATCH = "tcphab.patch";
     private final String DIFF_ID = "diffId";
     private final String ENV_DIFF_ID = "env.diffId";
     private final String HARBORMASTER_PHID = "harbormasterTargetPHID";
@@ -72,6 +78,18 @@ public final class AppConfig {
                     case CODE_LOCATION: 
                         logger.info(String.format("Found Code Location: %s", params.get(CODE_LOCATION)));
                         this.codeLocation = params.get(CODE_LOCATION);
+                        break;
+                    case PATCH: 
+                        logger.info(String.format("We should do patch action: %s", params.get(PATCH)));
+                        this.shouldPatch = params.get(PATCH).equals("true") ? true : false;
+                        break;
+                    case REPORT_BEGIN:
+                        logger.info(String.format("We should do report_begin action: %s", params.get(REPORT_BEGIN)));
+                        this.reportBegin = params.get(REPORT_BEGIN).equals("true") ? true : false;
+                        break;
+                    case REPORT_END:
+                        logger.info(String.format("We should do report_end action: %s", params.get(REPORT_END)));
+                        this.reportEnd = params.get(REPORT_END).equals("true") ? true: false;
                         break;
                     case ARC_PATH:
                         logger.info(String.format("Found arcPath: %s", params.get(ARC_PATH)));
@@ -175,6 +193,18 @@ public final class AppConfig {
 
     public Boolean isEnabled() {
         return this.enabled;
+    }
+
+    public Boolean reportBegin() {
+        return this.reportBegin;
+    }
+
+    public Boolean reportEnd() {
+        return this.reportEnd;
+    }
+
+    public Boolean shouldPatch() {
+        return this.shouldPatch;
     }
 
     public void setEnabled(Boolean enabled) {
